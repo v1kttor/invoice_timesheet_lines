@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class Wizard(models.TransientModel):
@@ -8,4 +8,9 @@ class Wizard(models.TransientModel):
 
     product = fields.Many2one(
         'product.product', required=True, string="Product")
-    # checkbox =
+    checkbox = fields.Boolean(default=False, string="Merge timesheet entries")
+
+    @api.multi
+    def create(self):
+        pass
+        # sukurti invoica
