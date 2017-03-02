@@ -16,7 +16,7 @@
             <form string="Create Invoice">
                 <group>
                     <field name="product"/>
-                    <field name="checkbox"/>
+                    <field name="merge_timesheet"/>
                 </group>
                 <footer>
                     <button name="create"
