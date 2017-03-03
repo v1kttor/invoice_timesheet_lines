@@ -12,5 +12,8 @@ class Wizard(models.TransientModel):
 
     @api.multi
     def create(self):
+        self._context.get('active_ids')
         pass
-        # sukurti invoica
+        # return line's
+
+    line_ids = fields.Many2many('account.analytic.line', default=create)
