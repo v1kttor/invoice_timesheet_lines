@@ -2,17 +2,19 @@
 {
     'name': "Invoice Timesheet Lines",
     'summary': '',
-    'description': '',
+    'description': 'Invoice Timesheet Lines',
     'author': "Viktoras",
     'website': "http://www.yourcompany.com",
     'category': 'Uncategorized',
-    'version': '10.0.1',
+    'version': '10.0.0.1.0',
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account'],
+    'depends': [
+        'hr_timesheet',
+    ],
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/invoice_timesheet.xml'
+        'views/account_analytic.xml',
+        'wizards/analytic_view.xml',
     ],
 }
