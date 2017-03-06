@@ -23,7 +23,12 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
 
     @api.multi
     def create_lines(self):
+        analytic_line_invoice_wizard = self.env['analytic.line.invoice.wizard']
         account_lines = self.env['account.analytic.line']
         account_invoice = self.env['account.invoice']
         account_invoice_lines = self.env['account.invoice.line']
-        
+
+        if analytic_line_invoice_wizard.line_ids:
+            invoice_vals = {}
+            new_invoice = account_invoice_lines.create()
+            pass
