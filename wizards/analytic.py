@@ -26,6 +26,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         account_invoice = self.env['account.invoice']
         for rec in self:
             for line in rec.line_ids:
+                #    if rec.merge_timesheets is True:
 
                 line_vals = {
                     'name': line.name,
@@ -39,4 +40,10 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                     'partner_id': line.project_id.partner_id.id,
                     'invoice_line_ids': [(0, 0, line_vals)],
                 }
+                line.is_invoiced = True
         account_invoice.create(invoice_vals)
+
+        """If "Merge timesheet entries" is checked, all the account.analytic.line
+        should be summed into one and only one invoice line should be created.
+        If during creation of the wizard the selected account.analytic.line lines contain different partners,
+        the multiple invoices should be created. After invoices are created, a list of created invoices should be displayed."""
