@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import itertools
 from datetime import date
 
@@ -27,35 +28,61 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         default=False, string="Merge timesheet entries")
     line_ids = fields.Many2many(
         'account.analytic.line', default=_default_line_ids)
+    invoices = fields.Many2many(
+        'account.invoice', string="Invoices")
+    state = fields.Selection([
+            ('initial', 'Initial'),
+            ('finished', 'Finished'),
+        ], string='Status', default='initial')
 
-    def _prepare_invoice_line_vals(self, invoice, product, line):
+    def _prepare_single_line_vals(self, name, qty, product, invoice):
         ivl_obj = self.env['account.invoice.line']
+
         line_vals = {
             'product_id': product.id,
             'invoice_id': invoice.id,
-            'quantity': line.unit_amount,
+            'quantity': qty,
         }
         tmp_line = ivl_obj.new(line_vals)
         tmp_line._onchange_product_id()
-        if not tmp_line.account_id:
-            raise UserError("Please set Account for selected lines")
-        tmpvals = [(f, tmp_line[f]) for f in tmp_line._fields]
+        # tmpvals = [(f, tmp_line[f]) for f in tmp_line._fields]
         line_vals.update({
-            # Jei merginam eilutes, tai 'name' tures ateiti is tmp_line.name
-            'name': line.name,
+            'name': name,
             'account_id': tmp_line.account_id.id,
             'price_unit': tmp_line.price_unit,
             'uom_id': tmp_line.uom_id.id,
             'invoice_line_tax_ids': [
-                (6, 0, tmp_line.invoice_line_tax_ids.ids)
-            ],
-            'price_subtotal': tmp_line.price_subtotal
+                (6, 0, tmp_line.invoice_line_tax_ids.ids)],
+            'price_subtotal': tmp_line.price_subtotal,
         })
         return line_vals
 
+    def _prepare_invoice_line_vals(self, invoice, product, lines, merge=False):
+        self.env['account.invoice.line']
+
+        if merge:
+            qty = 0.0
+            for line in lines:
+                qty += line.unit_amount
+            name = line.name
+            return [(lines, self._prepare_single_line_vals(
+                name, qty, product, invoice))]
+        else:
+            result = []
+            for line in lines:
+                result.append(
+                    (
+                        line,
+                        self._prepare_single_line_vals(
+                            line.name, line.unit_amount, product, invoice))
+                )
+            return result
+
     def _prepare_invoice_vals(self, partner, lines):
         if not partner.id:
-            raise UserError("Please set Customer for selected lines")
+            for line in lines:
+                raise UserError(
+                    'Please set Customer for %s' % (line.project_id.name))
         else:
             vals = {
                 'partner_id': partner.id,
@@ -66,29 +93,42 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
 
     @api.multi
     def create_lines(self):
+        # self.state == 'initial'
         invoice_obj = self.env['account.invoice']
         line_obj = self.env['account.invoice.line']
         for record in self:
+            if record.line_ids.filtered('is_invoiced'):
+                raise ValidationError(
+                    "One or more of lines is already invoiced")
             grouped_lines = itertools.groupby(
                 record.line_ids.sorted(
                     by_line_partner), key=by_line_partner)
             for partner, lines in grouped_lines:
                 invoice_vals = self._prepare_invoice_vals(partner, lines)
                 invoice = invoice_obj.create(invoice_vals)
-                for line in lines:
-                    if line.is_invoiced:
-                        raise ValidationError("Line is already invoiced")
-                    inv_line = line_obj.create(
-                        self._prepare_invoice_line_vals(
-                            invoice, record.product_id, line
-                            ))
-                    invoice.compute_taxes()
-                    line.is_invoiced = True
-                    # reikia susieti line (account.analytic.line) su sukurta
-                    # invoice line (inv_line) ir is_invoiced uzsettinti i True
-    """If "Merge timesheet entries" is checked, all the account.analytic.line
-    should be summed into one and only one invoice line should be created.
-    If during creation of the wizard the selected account.analytic.line
-    lines contain different partners,
-    the multiple invoices should be created. After invoices are created,
+                results = self._prepare_invoice_line_vals(
+                        invoice,
+                        record.product_id,
+                        lines,
+                        merge=record.merge_timesheets)
+                for aal_lines, line_vals in results:
+                    inv_line = line_obj.create(line_vals)
+                    for aal_line in aal_lines:
+                        aal_line.invoice_line_id = inv_line
+                        aal_line.is_invoiced = True
+                invoice.compute_taxes()
+            self.state = "finished"
+            self.invoices += invoice
+            return {
+                'name': 'Created new invoices',
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'analytic.line.invoice.wizard',
+                # 'view_id': view_id,
+                'res_id': self.id,
+                'target': 'new',
+            }
+
+    """After invoices are created,
      a list of created invoices should be displayed."""
