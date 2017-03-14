@@ -129,6 +129,3 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 'res_id': self.id,
                 'target': 'new',
             }
-
-    """After invoices are created,
-     a list of created invoices should be displayed."""
