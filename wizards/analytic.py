@@ -93,7 +93,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
 
     @api.multi
     def create_lines(self):
-        # self.state == 'initial'
         invoice_obj = self.env['account.invoice']
         line_obj = self.env['account.invoice.line']
         for record in self:
