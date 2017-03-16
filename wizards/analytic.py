@@ -82,7 +82,8 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         if not partner.id:
             for line in lines:
                 raise UserError(
-                    'Please set Customer for %s' % (line.project_id.name))
+                    'Please set Customer for %s \n Project --> Projects'
+                    % (line.project_id.name))
         else:
             vals = {
                 'partner_id': partner.id,
@@ -116,8 +117,8 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                         aal_line.invoice_line_id = inv_line
                         aal_line.is_invoiced = True
                 invoice.compute_taxes()
-            self.state = "finished"
-            self.invoices += invoice
+                self.state = "finished"
+                self.invoices += invoice
             return {
                 'name': 'Created new invoices',
                 'type': 'ir.actions.act_window',
