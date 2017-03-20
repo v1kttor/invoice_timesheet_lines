@@ -9,7 +9,19 @@
                     <field name="product_id" domain="[('type', 'in', ['service'])]"/>
                     <field name="merge_timesheets"/>
                 </group>
-                    <field name="invoices" states="finished"/>
+                    <field name="invoices" states="finished">
+                        <tree edit="0" delete="0" create="0">
+                            <field name="partner_id" groups="base.group_user" string="Customer"/>
+                            <field name="date_invoice"/>
+                            <field name="number"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                            <field name="user_id"/>
+                            <field name="date_due"/>
+                            <field name="amount_total_signed" string="Total" sum="Total"/>
+                            <field name="residual_signed" string="Amount Due" sum="Amount Due"/>
+                            <field name="state"/>
+                        </tree>
+                    </field>
                 <footer states="initial">
                     <button name="create_lines"
                             type="object"

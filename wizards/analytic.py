@@ -35,53 +35,24 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             ('finished', 'Finished'),
         ], string='Status', default='initial')
 
-    '''
-    def _prepare_single_line_vals(self, name, qty, product, invoice):
-        ivl_obj = self.env['account.invoice.line']
-
-        line_vals = {
-            'product_id': product.id,
-            'invoice_id': invoice.id,
-            'quantity': qty,
-        }
-        tmp_line = ivl_obj.new(line_vals)
-        tmp_line._onchange_product_id()
-        line_vals.update({
-            'name': name,
-            'account_id': tmp_line.account_id.id,
-            'price_unit': tmp_line.price_unit,
-            'uom_id': tmp_line.uom_id.id,
-            'price_subtotal': tmp_line.price_subtotal,
-            'invoice_line_tax_ids': [
-                (6, 0, tmp_line.invoice_line_tax_ids.ids)
-            ],
-        })
-        return line_vals
-    '''
-
     def _prepare_single_line_vals(self, name, qty, product, invoice):
         ivl_obj = self.env['account.invoice.line']
         line_vals = {
             'product_id': product.id,
             'invoice_id': invoice.id,
             'quantity': qty,
+            'name': False,
+            'account_id': False,
+            'price_unit': False,
+            'uom_id': False,
+            'price_subtotal': False,
+            'invoice_line_tax_ids': False,
         }
-        tmp_line = ivl_obj.new(line_vals)
-        tmp_line._onchange_product_id()
-        # specs = ivl_obj._onchange_spec()
-        # updates = ivl_obj.onchange(line_vals, ['product_id'], specs)
-        # import pdb; pdb.set_trace()
-        # value = updates.get()
-        line_vals.update({
-            'name': name,
-            'account_id': tmp_line.account_id.id,
-            'price_unit': tmp_line.price_unit,
-            'uom_id': tmp_line.uom_id.id,
-            'price_subtotal': tmp_line.price_subtotal,
-            'invoice_line_tax_ids': [
-                (6, 0, tmp_line.invoice_line_tax_ids.ids)
-            ],
-        })
+        specs = ivl_obj._onchange_spec()
+        updates = ivl_obj.onchange(line_vals, ['product_id'], specs)
+        value = updates.get('value', {})
+        value = ivl_obj._convert_to_write(value)
+        line_vals.update(value)
         return line_vals
 
     def _prepare_invoice_line_vals(self, invoice, product, lines, merge=False):
@@ -152,7 +123,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 'view_type': 'form',
                 'view_mode': 'form',
                 'res_model': 'analytic.line.invoice.wizard',
-                # 'view_id': view_id,
                 'res_id': self.id,
                 'target': 'new',
             }
