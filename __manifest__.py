@@ -4,7 +4,7 @@
     'summary': '',
     'description': 'Invoice Timesheet Lines',
     'author': "Viktoras",
-    'website': "http://www.yourcompany.com",
+    'website': "",
     'category': 'Uncategorized',
     'version': '10.0.0.1.0',
     # any module necessary for this one to work correctly

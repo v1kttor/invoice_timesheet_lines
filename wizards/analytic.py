@@ -35,6 +35,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             ('finished', 'Finished'),
         ], string='Status', default='initial')
 
+    '''
     def _prepare_single_line_vals(self, name, qty, product, invoice):
         ivl_obj = self.env['account.invoice.line']
 
@@ -45,15 +46,41 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         }
         tmp_line = ivl_obj.new(line_vals)
         tmp_line._onchange_product_id()
-        # tmpvals = [(f, tmp_line[f]) for f in tmp_line._fields]
         line_vals.update({
             'name': name,
             'account_id': tmp_line.account_id.id,
             'price_unit': tmp_line.price_unit,
             'uom_id': tmp_line.uom_id.id,
-            'invoice_line_tax_ids': [
-                (6, 0, tmp_line.invoice_line_tax_ids.ids)],
             'price_subtotal': tmp_line.price_subtotal,
+            'invoice_line_tax_ids': [
+                (6, 0, tmp_line.invoice_line_tax_ids.ids)
+            ],
+        })
+        return line_vals
+    '''
+
+    def _prepare_single_line_vals(self, name, qty, product, invoice):
+        ivl_obj = self.env['account.invoice.line']
+        line_vals = {
+            'product_id': product.id,
+            'invoice_id': invoice.id,
+            'quantity': qty,
+        }
+        tmp_line = ivl_obj.new(line_vals)
+        tmp_line._onchange_product_id()
+        # specs = ivl_obj._onchange_spec()
+        # updates = ivl_obj.onchange(line_vals, ['product_id'], specs)
+        # import pdb; pdb.set_trace()
+        # value = updates.get()
+        line_vals.update({
+            'name': name,
+            'account_id': tmp_line.account_id.id,
+            'price_unit': tmp_line.price_unit,
+            'uom_id': tmp_line.uom_id.id,
+            'price_subtotal': tmp_line.price_subtotal,
+            'invoice_line_tax_ids': [
+                (6, 0, tmp_line.invoice_line_tax_ids.ids)
+            ],
         })
         return line_vals
 
@@ -64,9 +91,9 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             qty = 0.0
             for line in lines:
                 qty += line.unit_amount
-            name = line.name
+            line_name = line.name
             return [(lines, self._prepare_single_line_vals(
-                name, qty, product, invoice))]
+                line_name, qty, product, invoice))]
         else:
             result = []
             for line in lines:
@@ -99,7 +126,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         for record in self:
             if record.line_ids.filtered('is_invoiced'):
                 raise ValidationError(
-                    "One or more of lines is already invoiced")
+                    "One or more lines are already invoiced")
             grouped_lines = itertools.groupby(
                 record.line_ids.sorted(
                     by_line_partner), key=by_line_partner)
