@@ -40,7 +40,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             'product_id': product.id,
             'invoice_id': invoice.id,
             'quantity': qty,
-            'name': name,
+            'name': False,
             'account_id': False,
             'price_unit': False,
             'uom_id': False,
@@ -52,6 +52,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         value = updates.get('value', {})
         value = ivl_obj._convert_to_write(value)
         line_vals.update(value)
+        line_vals['name'] = name
         return line_vals
 
     def _prepare_invoice_line_vals(self, invoice, product, lines, merge=False):
@@ -111,9 +112,9 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                     for aal_line in aal_lines:
                         aal_line.invoice_line_id = inv_line
                         aal_line.is_invoiced = True
-                invoice.compute_taxes()
                 self.state = "finished"
                 self.invoices += invoice
+                self.invoices.compute_taxes()
             return {
                 'name': _('Created new invoice'),
                 'type': 'ir.actions.act_window',

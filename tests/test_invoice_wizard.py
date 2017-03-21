@@ -50,14 +50,14 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'name': 'Line',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 1,
+            'unit_amount': 1.0,
             'project_id': self.project.id,
         })
         aal1 = self.aal_obj.create({
             'name': 'Line2',
             'account_id': self.account.id,
             'date': date(2017, 3, 16),
-            'unit_amount': 2,
+            'unit_amount': 2.0,
             'project_id': self.project2.id,
         })
         product = self.product_obj.create({
@@ -75,12 +75,12 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         invoice1 = wizard.invoices[1]
         invoice_line = invoice.invoice_line_ids[0]
         invoice_line1 = invoice1.invoice_line_ids[0]
-        self.assertEqual(invoice_line.quantity, 2.0)
-        self.assertEqual(invoice_line1.quantity, 1.0)
+        self.assertEqual(invoice_line.quantity, 1.0)
+        self.assertEqual(invoice_line1.quantity, 2.0)
         self.assertEqual(
-            invoice.partner_id.name, aal1.project_id.partner_id.name)
+            invoice.partner_id.name, aal.project_id.partner_id.name)
         self.assertEqual(
-            invoice1.partner_id.name, aal.project_id.partner_id.name)
+            invoice1.partner_id.name, aal1.project_id.partner_id.name)
 
     def test_invoice_invoice(self):
         aal = self.aal_obj.create({
@@ -127,21 +127,21 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'name': 'Line2',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 2,
+            'unit_amount': 2.0,
             'project_id': self.project.id,
         })
         aal2 = self.aal_obj.create({
             'name': 'Line3',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 3,
+            'unit_amount': 3.0,
             'project_id': self.project2.id,
         })
         aal3 = self.aal_obj.create({
             'name': 'Line4',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 5,
+            'unit_amount': 5.0,
             'project_id': self.project2.id,
         })
         product = self.product_obj.create({
@@ -163,8 +163,8 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         self.assertEqual(len(invoice1.invoice_line_ids), 1)
         invoice_line = invoice.invoice_line_ids[0]
         invoice_line1 = invoice1.invoice_line_ids[0]
-        self.assertEqual(invoice_line.quantity, 3)
-        self.assertEqual(invoice_line1.quantity, 8)
+        self.assertEqual(invoice_line.quantity, 8.0)
+        self.assertEqual(invoice_line1.quantity, 3.0)
         self.assertEqual(
             invoice_line.product_id.name, wizard.product_id.name)
         self.assertEqual(
