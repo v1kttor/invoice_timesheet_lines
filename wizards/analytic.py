@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-from datetime import date
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
@@ -41,7 +40,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             'product_id': product.id,
             'invoice_id': invoice.id,
             'quantity': qty,
-            'name': False,
+            'name': name,
             'account_id': False,
             'price_unit': False,
             'uom_id': False,
@@ -84,7 +83,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         else:
             return {
                 'partner_id': partner.id,
-                'date_invoice': date.today(),
+                'date_invoice': fields.Date.context_today(self),
                 'type': 'out_invoice',
             }
 
