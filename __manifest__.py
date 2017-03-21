@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Invoice Timesheet Lines",
+    'name': 'Invoice Timesheet Lines',
     'summary': '',
     'description': 'Invoice Timesheet Lines',
-    'author': "Viktoras",
+    'author': 'Viktoras',
     'website': "",
     'category': 'Uncategorized',
     'version': '10.0.0.1.0',
