@@ -3,7 +3,7 @@
 import itertools
 from datetime import date
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
 
 
@@ -78,17 +78,15 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
 
     def _prepare_invoice_vals(self, partner, lines):
         if not partner.id:
-            for line in lines:
-                raise UserError(
-                    'Please set Customer for %s \n Project --> Projects'
-                    % (line.project_id.name))
+            raise UserError(
+                _('Please set Customer for %s go to Project --> Projects')
+                % (partner.name))
         else:
-            vals = {
+            return {
                 'partner_id': partner.id,
                 'date_invoice': date.today(),
                 'type': 'out_invoice',
             }
-            return vals
 
     @api.multi
     def create_lines(self):
@@ -97,7 +95,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         for record in self:
             if record.line_ids.filtered('is_invoiced'):
                 raise ValidationError(
-                    "One or more lines are already invoiced")
+                    _('One or more lines are already invoiced'))
             grouped_lines = itertools.groupby(
                 record.line_ids.sorted(
                     by_line_partner), key=by_line_partner)
@@ -118,7 +116,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 self.state = "finished"
                 self.invoices += invoice
             return {
-                'name': 'Created new invoices',
+                'name': _('Created new invoice'),
                 'type': 'ir.actions.act_window',
                 'view_type': 'form',
                 'view_mode': 'form',
