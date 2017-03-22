@@ -109,16 +109,13 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                         merge=record.merge_timesheets)
                 for aal_lines, line_vals in results:
                     inv_line = line_obj.create(line_vals)
-                    # for aal_line in aal_lines:
-                        # aal_line.invoice_line_id = inv_line
-                        # aal_line.is_invoiced = True
                     aal_lines.write({
                         'is_invoiced': True,
                         'invoice_line_id': inv_line.id,
                     })
-                self.state = "finished"
-                self.invoices += invoice
-                self.invoices.compute_taxes()
+            self.state = "finished"
+            self.invoices += invoice
+            self.invoices.compute_taxes()
             return {
                 'name': _('Created new invoice'),
                 'type': 'ir.actions.act_window',
