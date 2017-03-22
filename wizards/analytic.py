@@ -62,7 +62,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             qty = 0.0
             qty = sum(line.unit_amount for line in lines)
             for line in lines:
-                qty += line.unit_amount
             line_name = line.name
             return [(lines, self._prepare_single_line_vals(
                 line_name, qty, product, invoice))]
