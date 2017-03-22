@@ -60,6 +60,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
 
         if merge:
             qty = 0.0
+            qty = sum(line.unit_amount for line in lines)
             for line in lines:
                 qty += line.unit_amount
             line_name = line.name
