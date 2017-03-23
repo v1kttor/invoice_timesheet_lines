@@ -122,7 +122,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'name': 'Line',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 1,
+            'unit_amount': 1.0,
             'project_id': self.project.id,
         })
         aal1 = self.aal_obj.create({
