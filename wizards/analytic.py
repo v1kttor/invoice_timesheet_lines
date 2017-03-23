@@ -27,7 +27,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         default=False, string="Merge timesheet entries")
     line_ids = fields.Many2many(
         'account.analytic.line', default=_default_line_ids)
-    # invoices = fields.Many2many('account.invoice', string="Invoices")
     state = fields.Selection([
             ('initial', 'Initial'),
             ('finished', 'Finished'),
@@ -78,7 +77,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         if not partner.id:
             raise ValidationError(
                 _('Please set Customer for %s go to Project --> Projects')
-                % (partner.name))  # (line.project_id.name))
+                % (partner.name))
         else:
             return {
                 'partner_id': partner.id,
@@ -86,15 +85,12 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 'type': 'out_invoice',
             }
 
-# is invoices ids listo per invoice obj pasimsiu per .browse()
-# paduosiu invoice ids. ir return recordsetr.
-
     @api.multi
     def create_lines(self):
         self.ensure_one()
         invoice_obj = self.env['account.invoice']
         line_obj = self.env['account.invoice.line']
-        invoice_list = self.env['account.invoice']
+        all_invoices = self.env['account.invoice']
         if self.line_ids.filtered('is_invoiced'):
             raise ValidationError(
                 _('One or more lines are already invoiced'))
@@ -118,8 +114,8 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                     'invoice_line_id': inv_line.id,
                 })
             self.state = "finished"
-            invoice_list += invoice
-        invoice_list.compute_taxes()
+            all_invoices += invoice
+        all_invoices.compute_taxes()
         return {
             'name': _('Created new invoice'),
             'type': 'ir.actions.act_window',
@@ -127,5 +123,5 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             'view_mode': 'tree,form',
             'res_model': 'account.invoice',
             'target': 'current',
-            'domain': [['id', 'in', invoice_list.ids]],
+            'domain': [['id', 'in', all_invoices.ids]],
         }
