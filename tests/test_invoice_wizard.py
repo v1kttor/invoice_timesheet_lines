@@ -11,6 +11,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
 
     def setUp(self):
         super(TestAnalyticLineInvoiceWizard, self).setUp()
+        self.invoice_obj = self.env['account.invoice']
         self.wizard_obj = self.env['analytic.line.invoice.wizard']
         self.aal_obj = self.env['account.analytic.line']
         self.product_obj = self.env['product.product']
@@ -68,10 +69,11 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'product_id': product.id,
             'line_ids': [(6, 0, aal_list)],
         })
-        wizard.create_lines()
-        self.assertEqual(len(wizard.invoices), 2)
-        invoice = wizard.invoices[0]
-        invoice1 = wizard.invoices[1]
+        action = wizard.create_lines()
+        invoices = self.invoice_obj.search(action['domain'])
+        self.assertEqual(len(invoices), 2)
+        invoice = invoices[0]
+        invoice1 = invoices[1]
         invoice_line = invoice.invoice_line_ids[0]
         invoice_line1 = invoice1.invoice_line_ids[0]
         self.assertEqual(invoice_line.quantity, 1.0)
@@ -97,12 +99,13 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'product_id': product.id,
             'line_ids': [(6, 0, [aal.id])],
         })
-        wizard.create_lines()
-        self.assertEqual(len(wizard.invoices), 1)
-        invoice = wizard.invoices[0]
+        action = wizard.create_lines()
+        invoices = self.invoice_obj.search(action['domain'])
+        self.assertEqual(len(invoices), 1)
+        invoice = invoices[0]
         self.assertEqual(len(invoice.invoice_line_ids), 1)
         invoice_line = invoice.invoice_line_ids[0]
-        self.assertEqual(invoice_line.price_unit, 50)
+        self.assertEqual(invoice_line.price_unit, 50.0)
         # self.assertFloatEqual(invoice_line.price_unit, 50)
         self.assertEqual(len(invoice_line.invoice_line_tax_ids), 1)
         invoice_line_tax = invoice_line.invoice_line_tax_ids[0]
@@ -153,19 +156,22 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'line_ids': [(6, 0, aal_list)],
             'merge_timesheets': True,
         })
-        wizard.create_lines()
-        self.assertEqual(len(wizard.invoices), 2)
-        # invoices = wizard.invoices
-        invoice = wizard.invoices[0]
-        invoice1 = wizard.invoices[1]
+        action = wizard.create_lines()
+        invoices = self.invoice_obj.search(action['domain'])
+        if len(invoices) != 2:
+            import pdb; pdb.set_trace()
+        self.assertEqual(len(invoices), 2)
+        invoice = invoices[0]
+        invoice1 = invoices[1]
         self.assertEqual(len(invoice.invoice_line_ids), 1)
         self.assertEqual(len(invoice1.invoice_line_ids), 1)
         invoice_line = invoice.invoice_line_ids[0]
         invoice_line1 = invoice1.invoice_line_ids[0]
-        # self.assertEqual(invoice_line.quantity, 8.0)
-        # self.assertEqual(invoice_line1.quantity, 3.0)
+        qty_list = [8.0, 3.0]
+        self.assertIn(invoice_line.quantity, qty_list)
+        self.assertIn(invoice_line1.quantity, qty_list)
         quantity = invoice_line.quantity + invoice_line1.quantity
-        self.assertEqual(quantity, 11) # kitaip isiblasko eilutes
+        self.assertEqual(quantity, 11)
         self.assertEqual(
             invoice_line.product_id.name, wizard.product_id.name)
         self.assertEqual(
@@ -196,9 +202,10 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'line_ids': [(6, 0, aal_list)],
             'merge_timesheets': True,
         })
-        wizard.create_lines()
-        self.assertEqual(len(wizard.invoices), 1)
-        invoice = wizard.invoices[0]
+        action = wizard.create_lines()
+        invoices = self.invoice_obj.search(action['domain'])
+        self.assertEqual(len(invoices), 1)
+        invoice = invoices[0]
         self.assertEqual(len(invoice.invoice_line_ids), 1)
         invoice_line = invoice.invoice_line_ids[0]
         self.assertEqual(invoice_line.quantity, 6)

@@ -27,8 +27,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         default=False, string="Merge timesheet entries")
     line_ids = fields.Many2many(
         'account.analytic.line', default=_default_line_ids)
-    invoices = fields.Many2many(
-        'account.invoice', string="Invoices")
+    # invoices = fields.Many2many('account.invoice', string="Invoices")
     state = fields.Selection([
             ('initial', 'Initial'),
             ('finished', 'Finished'),
@@ -79,7 +78,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         if not partner.id:
             raise ValidationError(
                 _('Please set Customer for %s go to Project --> Projects')
-                % (partner.name)) #  % (line.project_id.name))
+                % (partner.name))  # (line.project_id.name))
         else:
             return {
                 'partner_id': partner.id,
@@ -87,50 +86,46 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 'type': 'out_invoice',
             }
 
+# is invoices ids listo per invoice obj pasimsiu per .browse()
+# paduosiu invoice ids. ir return recordsetr.
+
     @api.multi
     def create_lines(self):
+        self.ensure_one()
         invoice_obj = self.env['account.invoice']
         line_obj = self.env['account.invoice.line']
-        for record in self:
-            if record.line_ids.filtered('is_invoiced'):
-                raise ValidationError(
-                    _('One or more lines are already invoiced'))
-            partner_key = lambda x: x.project_id.partner_id
-            grouped_lines = itertools.groupby(
-                record.line_ids.sorted(partner_key), key=partner_key)
-            for partner, group in grouped_lines:
-                lines = self.env['account.analytic.line']
-                for line in group:
-                    lines += line
-                # lines = map(lambda l: m+l, group)
-                invoice_vals = self._prepare_invoice_vals(partner, lines)
-                invoice = invoice_obj.create(invoice_vals)
-                results = self._prepare_invoice_line_vals(
-                        invoice,
-                        record.product_id,
-                        lines,
-                        merge=record.merge_timesheets)
-                for aal_lines, line_vals in results:
-                    inv_line = line_obj.create(line_vals)
-                    # for aal_line in aal_lines:
-                    #     aal_line.invoice_line_id = inv_line
-                    #    aal_line.is_invoiced = True
-                    aal_lines.write({
-                        'is_invoiced': True,
-                        'invoice_line_id': inv_line.id,
-                    })
-                self.state = "finished"
-                self.invoices += invoice
-                self.invoices.compute_taxes()
-            return {
-                'name': _('Created new invoice'),
-                'type': 'ir.actions.act_window',
-                'view_type': 'form',
-                'view_mode': 'tree', # tree
-                # 'res_model': 'analytic.line.invoice.wizard',
-                'res_model': 'account.invoice',
-                'res_ids': self.invoices.ids,
-                # 'target': 'new',
-                'target': 'current',
-                'domain': [['id', 'in', self.invoices.ids]],
-            }
+        invoice_list = self.env['account.invoice']
+        if self.line_ids.filtered('is_invoiced'):
+            raise ValidationError(
+                _('One or more lines are already invoiced'))
+        grouped_lines = itertools.groupby(
+            self.line_ids.sorted(by_line_partner), key=by_line_partner)
+        for partner, group in grouped_lines:
+            lines = self.env['account.analytic.line']
+            for line in group:
+                lines += line
+            invoice_vals = self._prepare_invoice_vals(partner, lines)
+            invoice = invoice_obj.create(invoice_vals)
+            results = self._prepare_invoice_line_vals(
+                    invoice,
+                    self.product_id,
+                    lines,
+                    merge=self.merge_timesheets)
+            for aal_lines, line_vals in results:
+                inv_line = line_obj.create(line_vals)
+                aal_lines.write({
+                    'is_invoiced': True,
+                    'invoice_line_id': inv_line.id,
+                })
+            self.state = "finished"
+            invoice_list += invoice
+        invoice_list.compute_taxes()
+        return {
+            'name': _('Created new invoice'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'account.invoice',
+            'target': 'current',
+            'domain': [['id', 'in', invoice_list.ids]],
+        }
