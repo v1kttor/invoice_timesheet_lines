@@ -3,7 +3,7 @@
 import itertools
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError
 
 
 def by_line_partner(line):
@@ -59,12 +59,11 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         self.env['account.invoice.line']
 
         if merge:
-            qty = 0.0
-            qty = sum(line.unit_amount for line in lines)
-            for line in lines:
-            line_name = line.name
+            qty = sum(lines.mapped('unit_amount'))
+            lines.write({'is_invoiced': True})
             return [(lines, self._prepare_single_line_vals(
-                line_name, qty, product, invoice))]
+                product.name_get()[0][1], qty, product, invoice)
+            )]
         else:
             result = []
             for line in lines:
@@ -78,9 +77,9 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
 
     def _prepare_invoice_vals(self, partner, lines):
         if not partner.id:
-            raise UserError(
+            raise ValidationError(
                 _('Please set Customer for %s go to Project --> Projects')
-                % (partner.name))
+                % (partner.name)) #  % (line.project_id.name))
         else:
             return {
                 'partner_id': partner.id,
@@ -96,10 +95,14 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             if record.line_ids.filtered('is_invoiced'):
                 raise ValidationError(
                     _('One or more lines are already invoiced'))
+            partner_key = lambda x: x.project_id.partner_id
             grouped_lines = itertools.groupby(
-                record.line_ids.sorted(
-                    by_line_partner), key=by_line_partner)
-            for partner, lines in grouped_lines:
+                record.line_ids.sorted(partner_key), key=partner_key)
+            for partner, group in grouped_lines:
+                lines = self.env['account.analytic.line']
+                for line in group:
+                    lines += line
+                # lines = map(lambda l: m+l, group)
                 invoice_vals = self._prepare_invoice_vals(partner, lines)
                 invoice = invoice_obj.create(invoice_vals)
                 results = self._prepare_invoice_line_vals(
@@ -109,19 +112,25 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                         merge=record.merge_timesheets)
                 for aal_lines, line_vals in results:
                     inv_line = line_obj.create(line_vals)
+                    # for aal_line in aal_lines:
+                    #     aal_line.invoice_line_id = inv_line
+                    #    aal_line.is_invoiced = True
                     aal_lines.write({
                         'is_invoiced': True,
                         'invoice_line_id': inv_line.id,
                     })
-            self.state = "finished"
-            self.invoices += invoice
-            self.invoices.compute_taxes()
+                self.state = "finished"
+                self.invoices += invoice
+                self.invoices.compute_taxes()
             return {
                 'name': _('Created new invoice'),
                 'type': 'ir.actions.act_window',
                 'view_type': 'form',
-                'view_mode': 'form',
-                'res_model': 'analytic.line.invoice.wizard',
-                'res_id': self.id,
-                'target': 'new',
+                'view_mode': 'tree', # tree
+                # 'res_model': 'analytic.line.invoice.wizard',
+                'res_model': 'account.invoice',
+                'res_ids': self.invoices.ids,
+                # 'target': 'new',
+                'target': 'current',
+                'domain': [['id', 'in', self.invoices.ids]],
             }
