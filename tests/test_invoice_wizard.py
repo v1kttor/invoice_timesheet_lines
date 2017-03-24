@@ -22,8 +22,10 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         self.project2.partner_id = self.env.ref('base.res_partner_2')
         self.project_no_partner = self.env.ref('project.project_project_4')
 
-    def assertFloatEqual(self, a, b):
-        return float_compare(a, b)
+    def assertFloatEqual(self, a, b, c):
+        comp = float_compare(a, b, precision_rounding=c.currency_id.rounding)
+        if comp is False:
+            return 0
 
     def test_invoiced_lines(self):
         aal = self.aal_obj.create({
@@ -76,12 +78,12 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         invoice1 = invoices[1]
         invoice_line = invoice.invoice_line_ids[0]
         invoice_line1 = invoice1.invoice_line_ids[0]
-        self.assertEqual(invoice_line.quantity, 1.0)
-        self.assertEqual(invoice_line1.quantity, 2.0)
+        self.assertEqual(invoice_line.quantity, 2.0)
+        self.assertEqual(invoice_line1.quantity, 1.0)
         self.assertEqual(
-            invoice.partner_id.name, aal.project_id.partner_id.name)
+            invoice.partner_id.name, aal1.project_id.partner_id.name)
         self.assertEqual(
-            invoice1.partner_id.name, aal1.project_id.partner_id.name)
+            invoice1.partner_id.name, aal.project_id.partner_id.name)
 
     def test_invoice_invoice(self):
         aal = self.aal_obj.create({
@@ -105,8 +107,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         invoice = invoices[0]
         self.assertEqual(len(invoice.invoice_line_ids), 1)
         invoice_line = invoice.invoice_line_ids[0]
-        self.assertEqual(invoice_line.price_unit, 50.0)
-        # self.assertFloatEqual(invoice_line.price_unit, 50)
+        self.assertFloatEqual(invoice_line.price_unit, 50, invoice_line)
         self.assertEqual(len(invoice_line.invoice_line_tax_ids), 1)
         invoice_line_tax = invoice_line.invoice_line_tax_ids[0]
         product_taxes = product.taxes_id[0]
@@ -121,28 +122,28 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         aal = self.aal_obj.create({
             'name': 'Line',
             'account_id': self.account.id,
-            'date': date(2017, 3, 15),
+            'date': date(2017, 5, 15),
             'unit_amount': 1.0,
             'project_id': self.project.id,
         })
         aal1 = self.aal_obj.create({
             'name': 'Line2',
             'account_id': self.account.id,
-            'date': date(2017, 3, 15),
+            'date': date(2017, 4, 15),
             'unit_amount': 2.0,
             'project_id': self.project.id,
         })
         aal2 = self.aal_obj.create({
             'name': 'Line3',
             'account_id': self.account.id,
-            'date': date(2017, 3, 15),
+            'date': date(2017, 6, 15),
             'unit_amount': 3.0,
             'project_id': self.project2.id,
         })
         aal3 = self.aal_obj.create({
             'name': 'Line4',
             'account_id': self.account.id,
-            'date': date(2017, 3, 15),
+            'date': date(2017, 4, 15),
             'unit_amount': 5.0,
             'project_id': self.project2.id,
         })

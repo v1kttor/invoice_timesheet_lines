@@ -16,8 +16,7 @@
                             type="object"
                             string="Create"
                             class="oe_highlight"/>
-                    <button special="cancel"
-                            string="Cancel"/>
+                    <button special="cancel" string="Cancel"/>
                 </footer>
                 <footer states="finished">
                     <button special="cancel"
@@ -25,7 +24,7 @@
                             class="oe_highlight"/>
                 </footer>
             </form>
-    </field>
+        </field>
     </record>
 
     <act_window name="Create Invoice"

@@ -7,7 +7,7 @@ from odoo.exceptions import ValidationError
 
 
 def by_line_partner(line):
-    return line.project_id.partner_id
+    return line.project_id.partner_id.id
 
 
 class AnalyticLineInvoiceWizard(models.TransientModel):
@@ -53,6 +53,8 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         line_vals['name'] = name
         return line_vals
 
+# kai paimu ne is eiles eilutes ,jis sumaiso partnerius ir sukuria 4 invoicus ,
+# o tu buti 2. Reikia kad tikrintu partnerius ir sudetu juos abu.
     def _prepare_invoice_line_vals(self, invoice, product, lines, merge=False):
         self.env['account.invoice.line']
 
@@ -73,17 +75,12 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 )
             return result
 
-    def _prepare_invoice_vals(self, partner, lines):
-        if not partner.id:
-            raise ValidationError(
-                _('Please set Customer for %s go to Project --> Projects')
-                % (partner.name))
-        else:
-            return {
-                'partner_id': partner.id,
-                'date_invoice': fields.Date.context_today(self),
-                'type': 'out_invoice',
-            }
+    def _prepare_invoice_vals(self, partner_id, lines):
+        return {
+            'partner_id': partner_id,
+            'date_invoice': fields.Date.context_today(self),
+            'type': 'out_invoice',
+        }
 
     @api.multi
     def create_lines(self):
@@ -94,13 +91,18 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         if self.line_ids.filtered('is_invoiced'):
             raise ValidationError(
                 _('One or more lines are already invoiced'))
+        for partner_line in self.line_ids:
+            if not partner_line.project_id.partner_id:
+                raise ValidationError(
+                    _('Please set Customer for %s go to Project --> Projects')
+                    % (self.line_ids.project_id.name))
         grouped_lines = itertools.groupby(
             self.line_ids.sorted(by_line_partner), key=by_line_partner)
-        for partner, group in grouped_lines:
+        for partner_id, group in grouped_lines:
             lines = self.env['account.analytic.line']
             for line in group:
                 lines += line
-            invoice_vals = self._prepare_invoice_vals(partner, lines)
+            invoice_vals = self._prepare_invoice_vals(partner_id, lines)
             invoice = invoice_obj.create(invoice_vals)
             results = self._prepare_invoice_line_vals(
                     invoice,
