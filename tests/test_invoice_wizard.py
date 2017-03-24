@@ -159,8 +159,6 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         })
         action = wizard.create_lines()
         invoices = self.invoice_obj.search(action['domain'])
-        if len(invoices) != 2:
-            import pdb; pdb.set_trace()
         self.assertEqual(len(invoices), 2)
         invoice = invoices[0]
         invoice1 = invoices[1]

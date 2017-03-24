@@ -53,8 +53,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         line_vals['name'] = name
         return line_vals
 
-# kai paimu ne is eiles eilutes ,jis sumaiso partnerius ir sukuria 4 invoicus ,
-# o tu buti 2. Reikia kad tikrintu partnerius ir sudetu juos abu.
     def _prepare_invoice_line_vals(self, invoice, product, lines, merge=False):
         self.env['account.invoice.line']
 
