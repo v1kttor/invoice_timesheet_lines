@@ -110,24 +110,27 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 })
             all_invoices += invoice
         all_invoices.compute_taxes()
+        final_invoice_vals = {
+            'name': _('Created new invoice'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'account.invoice',
+            'target': 'current',
+            'domain': [['id', 'in', all_invoices.ids]],
+        }
         if len(all_invoices) != 1:
-            return {
-                'name': _('Created new invoice'),
-                'type': 'ir.actions.act_window',
-                'view_type': 'form',
-                'view_mode': 'tree,form',
-                'res_model': 'account.invoice',
-                'target': 'current',
-                'domain': [['id', 'in', all_invoices.ids]],
-            }
+            return final_invoice_vals
         else:
-            return {
-                'name': _('Created new invoice'),
-                'type': 'ir.actions.act_window',
-                'view_type': 'form',
-                'view_mode': 'form',
-                'res_id': all_invoices.id,
-                'res_model': 'account.invoice',
-                'target': 'current',
-                'domain': [['id', 'in', all_invoices.ids]],
-            }
+            final_invoice_vals['view_mode'] = 'form'
+            final_invoice_vals['res_id'] = all_invoices.id
+            return final_invoice_vals
+            # return {
+            #     'name': _('Created new invoice'),
+            #     'type': 'ir.actions.act_window',
+            #     'view_type': 'form',
+            #     'view_mode': 'form',
+            #     'res_id': all_invoices.id,
+            #     'res_model': 'account.invoice',
+            #     'target': 'current',
+            #     'domain': [['id', 'in', all_invoices.ids]],
