@@ -110,7 +110,7 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                 })
             all_invoices += invoice
         all_invoices.compute_taxes()
-        final_invoice_vals = {
+        invoice_act = {
             'name': _('Created new invoice'),
             'type': 'ir.actions.act_window',
             'view_type': 'form',
@@ -120,8 +120,8 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             'domain': [['id', 'in', all_invoices.ids]],
         }
         if len(all_invoices) != 1:
-            return final_invoice_vals
+            return invoice_act
         else:
-            final_invoice_vals['view_mode'] = 'form'
-            final_invoice_vals['res_id'] = all_invoices.id
-            return final_invoice_vals
+            invoice_act['view_mode'] = 'form'
+            invoice_act['res_id'] = all_invoices.id
+            return invoice_act
