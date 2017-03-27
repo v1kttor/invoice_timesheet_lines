@@ -6,19 +6,18 @@
         <field name="model">analytic.line.invoice.wizard</field>
         <field name="arch" type="xml">
             <form string="Create Invoice">
-                <field name="state" invisible="1"/>
-                <group states="initial">
+                <group>
                     <field name="product_id" domain="[('type', 'in', ['service'])]"/>
                     <field name="merge_timesheets"/>
                 </group>
-                <footer states="initial">
+                <footer>
                     <button name="create_lines"
                             type="object"
                             string="Create"
                             class="oe_highlight"/>
                     <button special="cancel" string="Cancel"/>
                 </footer>
-                <footer states="finished">
+                <footer>
                     <button special="cancel"
                             string="Close"
                             class="oe_highlight"/>

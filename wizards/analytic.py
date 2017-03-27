@@ -27,10 +27,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         default=False, string="Merge timesheet entries")
     line_ids = fields.Many2many(
         'account.analytic.line', default=_default_line_ids)
-    state = fields.Selection([
-            ('initial', 'Initial'),
-            ('finished', 'Finished'),
-        ], string='Status', default='initial')
 
     def _prepare_single_line_vals(self, name, qty, product, invoice):
         ivl_obj = self.env['account.invoice.line']
