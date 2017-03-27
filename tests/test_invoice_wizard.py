@@ -23,20 +23,20 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         self.project_no_partner = self.env.ref('project.project_project_4')
         self.product = self.product_obj.create({
             'name': 'Table',
-            'lst_price': 50,
+            'lst_price': 50.0,
         })
 
     def assertFloatEqual(self, a, b, precision_rounding):
         comp = float_compare(a, b, precision_rounding)
-        if comp != 0:
-            return self.fail('float_compare !=0')
+        if comp != 0.0:
+            return self.fail('float_compare != 0.0')
 
     def test_invoiced_lines(self):
         aal = self.aal_obj.create({
             'name': 'Line',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 1,
+            'unit_amount': 1.0,
             'project_id': self.project1.id,
             'is_invoiced': True,
         })
@@ -89,7 +89,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'name': 'Line',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 2,
+            'unit_amount': 2.0,
             'project_id': self.project1.id,
         })
         wizard = self.wizard_obj.create({
@@ -105,7 +105,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         self.assertEqual(len(invoice.invoice_line_ids), 1)
         invoice_line = invoice.invoice_line_ids[0]
         self.assertFloatEqual(
-            invoice_line.price_unit, 50,
+            invoice_line.price_unit, 50.0,
             precision_rounding=invoice_line.currency_id.rounding)
         self.assertEqual(len(invoice_line.invoice_line_tax_ids), 1)
         invoice_line_tax = invoice_line.invoice_line_tax_ids[0]
@@ -114,7 +114,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         self.assertEqual(invoice_line_tax, product_taxes)
 
         self.assertFloatEqual(
-            invoice_line.price_subtotal, 100,
+            invoice_line.price_subtotal, 100.0,
             precision_rounding=invoice_line.currency_id.rounding)
         self.assertEqual(invoice_line.quantity, 2.0)
         self.assertEqual(
@@ -173,7 +173,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         self.assertIn(invoice_line1.quantity, qty_list)
 
         quantity = invoice_line.quantity + invoice_line1.quantity
-        self.assertEqual(quantity, 11)
+        self.assertEqual(quantity, 11.0)
         self.assertEqual(
             invoice_line.product_id.name, wizard.product_id.name)
         self.assertEqual(
@@ -184,14 +184,14 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'name': 'Line',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 2,
+            'unit_amount': 2.0,
             'project_id': self.project1.id,
         })
         aal1 = self.aal_obj.create({
             'name': 'Line2',
             'account_id': self.account.id,
             'date': date(2017, 3, 15),
-            'unit_amount': 4,
+            'unit_amount': 4.0,
             'project_id': self.project1.id,
         })
         aal_list = [aal.id, aal1.id]
@@ -208,7 +208,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
 
         self.assertEqual(len(invoice.invoice_line_ids), 1)
         invoice_line = invoice.invoice_line_ids[0]
-        self.assertEqual(invoice_line.quantity, 6)
+        self.assertEqual(invoice_line.quantity, 6.0)
         self.assertEqual(invoice_line.product_id.name, wizard.product_id.name)
 
     def test_no_customer(self):
@@ -216,7 +216,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             'name': 'Line',
             'account_id': self.account.id,
             'date': date(2017, 3, 17),
-            'unit_amount': 2,
+            'unit_amount': 2.0,
             'project_id': self.project_no_partner.id,
         })
         wizard = self.wizard_obj.create({

@@ -22,9 +22,9 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         ]
 
     product_id = fields.Many2one(
-        'product.product', required=True, string="Product")
+        'product.product', required=True, string='Product')
     merge_timesheets = fields.Boolean(
-        default=False, string="Merge timesheet entries")
+        default=False, string='Merge timesheet entries')
     line_ids = fields.Many2many(
         'account.analytic.line', default=_default_line_ids)
 
@@ -108,7 +108,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
                     'is_invoiced': True,
                     'invoice_line_id': inv_line.id,
                 })
-            self.state = "finished"
             all_invoices += invoice
         all_invoices.compute_taxes()
         return {
