@@ -70,6 +70,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         })
         action = wizard.create_lines()
         invoices = self.invoice_obj.search(action['domain'])
+
         self.assertEqual(len(invoices), 2)
         invoice = invoices[0]
         invoice1 = invoices[1]
@@ -97,6 +98,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         })
         action = wizard.create_lines()
         invoices = self.invoice_obj.search(action['domain'])
+
         self.assertEqual(len(invoices), 1)
         invoice = invoices[0]
 
@@ -115,9 +117,9 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
             invoice_line.price_subtotal, 100,
             precision_rounding=invoice_line.currency_id.rounding)
         self.assertEqual(invoice_line.quantity, 2.0)
-        self.assertEqual(invoice_line.product_id.name, wizard.product_id.name)
         self.assertEqual(
             invoice_line.partner_id.id, aal.project_id.partner_id.id)
+        self.assertEqual(invoice_line.product_id.name, wizard.product_id.name)
 
     def test_merge_lines(self):
         aal = self.aal_obj.create({
@@ -156,6 +158,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         })
         action = wizard.create_lines()
         invoices = self.invoice_obj.search(action['domain'])
+
         self.assertEqual(len(invoices), 2)
         invoice = invoices[0]
         invoice1 = invoices[1]
@@ -199,6 +202,7 @@ class TestAnalyticLineInvoiceWizard(common.TransactionCase):
         })
         action = wizard.create_lines()
         invoices = self.invoice_obj.search(action['domain'])
+
         self.assertEqual(len(invoices), 1)
         invoice = invoices[0]
 
