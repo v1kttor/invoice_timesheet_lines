@@ -7,4 +7,4 @@ class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
     invoice_line_id = fields.Many2one('account.invoice.line')
-    is_invoiced = fields.Boolean(string="Is Invoiced")
+    is_invoiced = fields.Boolean(string='Is Invoiced')
