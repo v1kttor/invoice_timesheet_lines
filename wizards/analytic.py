@@ -54,7 +54,6 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
 
         if merge:
             qty = sum(lines.mapped('unit_amount'))
-            lines.write({'is_invoiced': True})
             return [(lines, self._prepare_single_line_vals(
                 product.name_get()[0][1], qty, product, invoice)
             )]
@@ -88,8 +87,8 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
         for partner_line in self.line_ids:
             if not partner_line.project_id.partner_id:
                 raise ValidationError(
-                    _('Please set Customer for %s go to Project --> Projects')
-                    % (self.line_ids.project_id.name))
+                    _('Please set Customer for %s ')
+                    % self.line_ids.project_id.name)
         grouped_lines = itertools.groupby(
             self.line_ids.sorted(by_line_partner), key=by_line_partner)
         for partner_id, group in grouped_lines:
