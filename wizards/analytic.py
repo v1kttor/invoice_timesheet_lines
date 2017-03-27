@@ -125,12 +125,3 @@ class AnalyticLineInvoiceWizard(models.TransientModel):
             final_invoice_vals['view_mode'] = 'form'
             final_invoice_vals['res_id'] = all_invoices.id
             return final_invoice_vals
-            # return {
-            #     'name': _('Created new invoice'),
-            #     'type': 'ir.actions.act_window',
-            #     'view_type': 'form',
-            #     'view_mode': 'form',
-            #     'res_id': all_invoices.id,
-            #     'res_model': 'account.invoice',
-            #     'target': 'current',
-            #     'domain': [['id', 'in', all_invoices.ids]],
