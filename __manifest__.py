@@ -2,17 +2,14 @@
 
 {
     'name': 'Invoice Timesheet Lines',
-    'summary': '',
-    'description': 'Invoice Timesheet Lines',
-    'author': 'Viktoras',
-    'website': '',
-    'category': 'Uncategorized',
+    'summary': 'Invoice Timesheet Lines',
+    'author': 'Viktoras Norkus',
+    'category': 'HR',
     'version': '10.0.0.1.0',
     'depends': [
         'hr_timesheet',
     ],
     'data': [
-        # 'security/ir.model.access.csv',
         'views/account_analytic.xml',
         'wizards/analytic_view.xml',
     ],
