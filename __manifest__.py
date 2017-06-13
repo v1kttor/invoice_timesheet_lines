@@ -2,7 +2,6 @@
 
 {
     'name': 'Invoice Timesheet Lines',
-    'summary': 'Invoice Timesheet Lines',
     'author': 'Viktoras Norkus',
     'category': 'HR',
     'version': '10.0.0.1.0',
